@@ -14,33 +14,31 @@ load_dotenv()
 
 
 machine = TocMachine(
-    states=["user", "state1", "state2"],
+    states=["user", "cancel", "cancel2","order_food","order_name","order_num","order_success"],
     transitions=[
-        {
-            "trigger": "advance",
-            "source": "user",
-            "dest": "state1",
-            "conditions": "is_going_to_state1",
-        },
-        {
-            "trigger": "advance",
-            "source": "user",
-            "dest": "state2",
-            "conditions": "is_going_to_state2",
-        },
-        {"trigger": "go_back", "source": ["state1", "state2"], "dest": "user"},
+        #  訂餐流程
+        {"trigger": "advance", "source": "user"         ,"dest": "order_food"   ,"conditions": "is_going_to_order_food",},
+        {"trigger": "advance", "source": "order_food"   ,"dest": "order_name"   ,"conditions": "is_going_to_order_name",},
+        {"trigger": "advance", "source": "order_name"   ,"dest": "order_num"    ,"conditions": "is_going_to_order_num",},
+        {"trigger": "advance", "source": "order_num"    ,"dest": "order_success","conditions": "is_going_to_order_success",},
+        {"trigger": "advance", "source": "order_success","dest": "user",},
+        # 取消訂餐
+        {"trigger": "go_cancel","source": ["order_success","order_food","order_name","order_num"], "dest": "cancel",},
+        {"trigger": "advance", "source": "user", "dest": "cancel", "conditions": "is_going_to_cancel",},
+        {"trigger": "advance","source": "cancel1","dest": "user",},
+        ###go back
+        {"trigger": "go_back", "source": ["order_food","order_name","order_num","order_success","cancel","cancel2"], "dest": "user"},
     ],
     initial="user",
     auto_transitions=False,
     show_conditions=True,
 )
-
 app = Flask(__name__, static_url_path="")
 
 
 # get channel_secret and channel_access_token from your environment variable
-channel_secret = os.getenv("de66225e5b7178ba661b6ee89fad0", None)
-channel_access_token = os.getenv("sZ29YKa7DIEIxEY9/6xDemciPq9TG41GLdTwpBkTpGDfF5q+7cGxDKl8nvyQ9089srQpggK4FdPtPkpoLjzKIzuGL8evDzrMBUHd0rN6Sw6wbxXu1PUpPMAPIXHVAxQdB04t89/1O/w1cDnyilFU=", None)
+channel_secret = os.getenv("LINE_CHANNEL_SECRET", None)
+channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
 if channel_secret is None:
     print("Specify LINE_CHANNEL_SECRET as environment variable.")
     sys.exit(1)
