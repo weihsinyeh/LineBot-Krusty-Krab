@@ -14,20 +14,85 @@ load_dotenv()
 
 
 machine = TocMachine(
-    states=["user", "cancel", "cancel2","order_food","order_name","order_num","order_success"],
+    states=[
+        "menu",
+        "about",
+        "user",
+        "cancel",
+        "order_food",
+        "order_name",
+        "order_num",
+        "order_success",
+    ],
     transitions=[
         #  訂餐流程
-        {"trigger": "advance", "source": "user"         ,"dest": "order_food"   ,"conditions": "is_going_to_order_food",},
-        {"trigger": "advance", "source": "order_food"   ,"dest": "order_name"   ,"conditions": "is_going_to_order_name",},
-        {"trigger": "advance", "source": "order_name"   ,"dest": "order_num"    ,"conditions": "is_going_to_order_num",},
-        {"trigger": "advance", "source": "order_num"    ,"dest": "order_success","conditions": "is_going_to_order_success",},
-        {"trigger": "advance", "source": "order_success","dest": "user",},
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "order_food",
+            "conditions": "is_going_to_order_food",
+        },
+        {
+            "trigger": "advance",
+            "source": "order_food",
+            "dest": "order_name",
+            "conditions": "is_going_to_order_name",
+        },
+        {
+            "trigger": "advance",
+            "source": "order_name",
+            "dest": "order_num",
+            "conditions": "is_going_to_order_num",
+        },
+        {
+            "trigger": "advance",
+            "source": "order_num",
+            "dest": "order_success",
+            "conditions": "is_going_to_order_success",
+        },
+        {"trigger": "advance", "source": "order_success", "dest": "user",},
+        {"trigger": "go_add_food", "source": "order_success", "dest": "order_food"},
         # 取消訂餐
-        {"trigger": "go_cancel","source": ["order_success","order_food","order_name","order_num"], "dest": "cancel",},
-        {"trigger": "advance", "source": "user", "dest": "cancel", "conditions": "is_going_to_cancel",},
-        {"trigger": "advance","source": "cancel1","dest": "user",},
-        ###go back
-        {"trigger": "go_back", "source": ["order_food","order_name","order_num","order_success","cancel","cancel2"], "dest": "user"},
+        {
+            "trigger": "go_cancel",
+            "source": ["order_success", "order_food", "order_name", "order_num"],
+            "dest": "cancel",
+        },
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "cancel",
+            "conditions": "is_going_to_cancel",
+        },
+        {"trigger": "advance", "source": "cancel1", "dest": "user",},
+        # about
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "about",
+            "conditions": "is_going_to_about",
+        },
+        # menu
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "menu",
+            "conditions": "is_going_to_menu",
+        },
+        # go back
+        {
+            "trigger": "go_back",
+            "source": [
+                "order_food",
+                "order_name",
+                "order_num",
+                "order_success",
+                "cancel",
+                "about",
+                "menu",
+            ],
+            "dest": "user",
+        },
     ],
     initial="user",
     auto_transitions=False,
