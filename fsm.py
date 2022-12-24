@@ -1,11 +1,5 @@
 from transitions.extensions import GraphMachine
-
-# from linebot.models.send_messages import ImageSendMessage
-from utils import send_text_message
-
-# from utils import send_button_message, send_button_carousel, showGames, yesterGames, push_message, scrapeBoxscore, searchplayer, searchteam, showstanding, statleader, showschedule, showmeme, shownews, searchgame
 import os
-
 from linebot import LineBotApi, WebhookParser
 from linebot.models import (
     MessageEvent,
@@ -22,41 +16,50 @@ from linebot.models import (
     MessageTemplateAction,
 )
 
-from utils import (
-    send_menu,
-    send_address,
-    send_contact,
-    send_text_message,
-    send_about,
-    send_use,
-    send_address,
-    send_contact,
-    send_fsm,
-    send_breakfast,
-    send_lobby,
-)
-
-
+from utils import (send_menu,
+                    send_deliver,send_feedback,
+                    send_contact,send_text_message,send_about,send_fsm,send_lobby,send_weather,send_address,send_vehicle,send_food,)
+from emailweihsin import send_email
 class TocMachine(GraphMachine):
-    state = "user"
-    new_order_name = ""
+    new_order_index = 0
     new_order_number = 0
+    order_menu_list = []
     order_name_list = []
     order_number_list = []
     money = 0
-
+    menuindex = 0
+    feedbackreceiver = ""
+    menu = [[["Krabby patty",10], ["Krabby patty(w\sea chaasa)",15], ["Double krabby patty", 15], ["Double krabby patty(w\sea chaasa)", 20], ["Triple krabby patty",20], ["Triple krabby patty(w\sea chaasa)",25]],
+            [["Kelp rings", 15], ["Salty sauce", 5], ["Krabby meal", 20], ["Double krabby meal", 25], ["Triple krabby meal", 30], ["Salty sea dog", 15],["Footlong",25],["Sailors surprise",25],["Golden loaf",10],["Golden loaf (wsauce)",15]],
+            [["Kelp shake",20],["Seafoam soda(small)",5],["Seafoam soda(medium)",10],["Seafoam soda(large)",15]]]
+    hamburgeremoji = [{"index": 0, "productId": "5ac2211e031a6752fb806d61", "emojiId": "001"},]
     def __init__(self, **machine_configs):
         self.machine = GraphMachine(model=self, **machine_configs)
 
+    ### Cancel
     def is_going_to_cancel(self, event):
         text = event.message.text
-        return text.lower() == "@取消"
+        return text.lower() == "cancel"
 
+    ### Feature1 : about us
+    def is_going_to_about(self, event):
+        text = event.message.text
+        return text.lower() == "about us"
+
+    ### Feature2 : menu
+    def is_going_to_menu(self, event):
+        text = event.message.text
+        return text.lower() == "menu" or text.lower() == "order" or text.lower() == "order"
+
+    ### Feature3 : order
     def is_going_to_order_food(self, event):
         text = event.message.text
-        return text.lower() == "@主食" or text.lower() == "@套餐" or text.lower() == "@飲料"
+        global menuindex
+        if(text.lower() == "main food"): menuindex = 0
+        elif(text.lower() == "meal"): menuindex = 1
+        elif(text.lower() == "drink"): menuindex = 2
+        return text.lower() == "main food" or text.lower() == "meal" or text.lower() == "drink"
 
-    ### 訂餐流程
     def is_going_to_order_name(self, event):
         text = event.message.text
         return True
@@ -69,114 +72,190 @@ class TocMachine(GraphMachine):
         text = event.message.text
         return True
 
-    def is_going_to_about(self, event):
+    ### Feature 4 :Address
+    def is_going_to_address(self, event):
         text = event.message.text
-        return text.lower() == "@關於"
+        return text.lower() == "address"
 
-    def is_going_to_menu(self, event):
+    ### Feature 5 : weather
+    def is_going_to_weather(self, event):
         text = event.message.text
-        return text.lower() == "@菜單"
+        return text.lower() == "weather"
 
-    menu = [[1, 10], [2, 15], [3, 15], [4, 20], [5, 20], [6, 25]]
-    ### 餐點預定
-    def on_enter_order_food(self, event):  # 顯示菜單
-        print("開始 order_food")
-        TocMachine.state = "order_food"  # 設定狀態
-        reply_token = event.reply_token  # 取得回覆用的token
+    ### Feature 6 : way to eat food
+    def is_going_to_way_of_eat(self, event):
+        text = event.message.text
+        return text.lower() == "for here" or text.lower() == "deliver"
 
-        send_text_message(
-            reply_token,
-            "菜單:\n"
-            "蟹堡-----------------------價格\n"
-            "1.Krabby patty       (單層) 10$\n"
-            "2.w\sea chaasa(加海草醬)    15$\n"
-            "3.double krabby patty(雙層) 15$\n"
-            "4.w\sea chaasa(加海草醬)    20$\n"
-            "5.triple krabby patty(三層) 20$\n"
-            "6.w\sea chaasa(加海草醬)    25$\n"
-            "請輸入餐點編號:",
-        )
+    ### Feature 7 : Vehicle
+    def is_going_to_vehicle(self, event):
+        text = event.message.text
+        return text.lower() == "vehicle"
 
-    def on_enter_order_name(self, event):  # 輸入餐點名稱
-        print("進入 order_name")
-        TocMachine.state = "order_name"
-        TocMachine.new_order_name = event.message.text
-        reply_token = event.reply_token
-        send_text_message(
-            reply_token,
-            "你點了" + TocMachine.new_order_name + "號蟹堡\n" "請輸入數量:\n" "(如欲取消請輸入 @取消)",
-        )
+    def is_goint_to_vehicle_detail(self,event):
+        text = event.message.text
+        return text.lower() == "Food trunk"
 
-    def on_enter_order_num(self, event):  # 輸入餐點數量
-        print("進入 order_num")
-        TocMachine.state = "order_num"
-        reply_token = event.reply_token
-        if event.message.text != "@取消":
-            TocMachine.new_order_number = event.message.text
-            send_text_message(
-                reply_token,
-                "你點了"
-                + TocMachine.new_order_name
-                + "號餐點"
-                + TocMachine.new_order_number
-                + "份\n"
-                "(如欲確認請輸入 @確定)\n"
-                "(如欲取消請輸入 @取消)\n"
-                "(如欲繼續點餐請輸入 @加點)\n",
-            )
-        elif event.message.text == "@取消":
-            self.go_cancel(event)
+    ### Feature 8 : Contact
+    def is_going_to_contact(self, event):
+        text = event.message.text
+        return text.lower() == "contact"
+    ### Feature 9 : Feedback
+    def is_going_to_feedback(self, event):
+        text = event.message.text
+        return text.lower() == "feedback"
+    def is_going_to_character(self, event):
+        text = event.message.text
+        return True
+    def is_going_to_email(self, event):
+        text = event.message.text
+        return True
 
-    def on_enter_order_success(self, event):
-        print("I'm entering order_success")
-        TocMachine.state = "order_success"
-        reply_token = event.reply_token
-        text = "你點了\n"
-        if event.message.text == "@確定":
-            TocMachine.order_name_list.append(TocMachine.new_order_name)
-            TocMachine.order_number_list.append(TocMachine.new_order_number)
-            for i in range(len(TocMachine.order_name_list)):
-                text += (
-                    TocMachine.order_name_list[i]
-                    + "號餐點"
-                    + TocMachine.order_number_list[i]
-                    + "份\n"
-                )
-                money += TocMachine.menu[int(TocMachine.order_name_list[i]) - 1][
-                    1
-                ] * int(TocMachine.order_number_list[i])
-            send_text_message(reply_token, "訂餐成功，以下是您目前的訂單:\n" + text)
-            self.go_back()
-        elif event.message.text == "@加點":
-            TocMachine.order_name_list.append(TocMachine.new_order_name)
-            TocMachine.order_number_list.append(TocMachine.new_order_number)
-            self.go_add_food(event)
-        elif event.message.text == "@取消":
-            self.go_cancel(event)
-
+    ### Cancel
     def on_enter_cancel(self, event):
-        print("I'm entering cancel")
         reply_token = event.reply_token
-        TocMachine.state = "cancel"
-        send_text_message(reply_token, "親愛的顧客您已經取消訂餐")
+        send_text_message(reply_token, "$Dear customer, you have canceled the order",TocMachine.hamburgeremoji)
         self.go_back()
 
-    ### 關於我們
+    ### Feature1 : about us
     def on_enter_about(self, event):
-        print("I'm entering about")
-
         reply_token = event.reply_token
-
-        # send_text_message(reply_token, "呈現關於我們")
+        send_text_message(reply_token, "$About Krabby Patty",TocMachine.hamburgeremoji)
         send_about(reply_token)
         self.go_back()
 
-    ### 關於我們
+    ### Feature2 : menu
     def on_enter_menu(self, event):
-        print("I'm entering menu")
-
         reply_token = event.reply_token
-
-        # send_text_message(reply_token, "呈現關於我們")
         send_menu(reply_token)
+        self.go_back()
+
+    ### Feature 3 : Order Food (show the detail of the menu)
+    def on_enter_order_food(self, event):  
+        print("start order food")
+        reply_token = event.reply_token  
+        global menuindex
+        if menuindex == 0:
+            send_food(reply_token, 0)
+        elif menuindex == 1:
+            send_food(reply_token, 1)
+        elif menuindex == 2:
+            send_food(reply_token, 2)
+
+    def on_enter_order_name(self, event):  # 輸入餐點名稱
+        menu = TocMachine.menu
+        TocMachine.new_order_index = int(event.message.text) - 1
+        reply_token = event.reply_token
+        send_text_message( reply_token, "$You have ordered" + menu[menuindex][TocMachine.new_order_index][0] + \
+                            "\nPlease input number:\n" "(If you want to cancel, input \"cancel\")",TocMachine.hamburgeremoji)
+
+    def on_enter_order_num(self, event):  # 輸入餐點數量
+        menu = TocMachine.menu
+        reply_token = event.reply_token
+        if event.message.text != "cancel":
+            TocMachine.new_order_number = event.message.text
+            send_text_message(
+                reply_token,
+                "$You have ordered\n"
+                + TocMachine.new_order_number + " "+ menu[menuindex][TocMachine.new_order_index][0] \
+                + "\n(If you are sure, input \"sure\")\n"
+                + "(If you want to cancel, input \"cancel\")\n"
+                + "((If you want to order more, input \"order more\")\n",TocMachine.hamburgeremoji
+            )
+        elif event.message.text == "cancel":
+            self.go_cancel(event)
+
+    def on_enter_order_success(self, event):
+        menu = TocMachine.menu
+        reply_token = event.reply_token
+        text = ""
+        if event.message.text == "sure":
+            TocMachine.order_menu_list.append(menuindex)
+            TocMachine.order_name_list.append(TocMachine.new_order_index)
+            TocMachine.order_number_list.append(TocMachine.new_order_number)
+            for i in range(len(TocMachine.order_name_list)):
+                pay = TocMachine.menu[TocMachine.order_menu_list[i]][int(TocMachine.order_name_list[i])][1] * int(TocMachine.order_number_list[i])
+                text += (
+                    menu[TocMachine.order_menu_list[i]][TocMachine.order_name_list[i]][0]
+                    + " : "
+                    + str(TocMachine.order_number_list[i])
+                    + " $" + str(pay) + "\n"
+                )
+                TocMachine.money += pay
+            send_text_message(reply_token, "$Order Success!\nThe following is your current order:\n" + text,TocMachine.hamburgeremoji)
+            self.go_back()
+        elif event.message.text == "order more":
+            TocMachine.order_menu_list.append(menuindex)
+            TocMachine.order_name_list.append(TocMachine.new_order_index)
+            TocMachine.order_number_list.append(TocMachine.new_order_number)
+            self.go_add_food(event)
+        elif event.message.text == "cancel":
+            self.go_cancel(event)
+    ### Feature 3 : Order Food (show the detail of the menu)
+
+    ### Feature 4 : address
+    def on_enter_address(self, event):
+        reply_token = event.reply_token
+        send_address(reply_token)
+        self.go_back()
+
+    ### Feature 5 : weather       
+    def on_enter_weather(self, event):
+        reply_token = event.reply_token
+        send_weather(reply_token)
+        self.go_back()
+  
+    ### Feature 6 : way to eat food
+    def on_enter_way_of_eat(self, event):
+        reply_token = event.reply_token
+        if(event.message.text == "for here"):
+            send_text_message(reply_token, "$You have chosen to eat here",TocMachine.hamburgeremoji)
+        elif(event.message.text == "deliver"):
+            if(TocMachine.money == 0):
+                send_text_message(reply_token, "$You have to order food!",TocMachine.hamburgeremoji)
+            else:
+                send_deliver(reply_token)
+        self.go_back()
+
+    ### Feature 7 : vehicle
+    def on_enter_vehicle(self, event):  
+        reply_token = event.reply_token
+        send_vehicle(reply_token)
+        self.go_back()
+        
+    ### Feature 8 : contact
+    def on_enter_contact(self, event):
+        reply_token = event.reply_token
+        send_contact(reply_token)
+        self.go_back()
+
+    ### Feature 9 : feedback
+    def on_enter_feedback(self, event):
+        reply_token = event.reply_token
+        send_feedback(reply_token)
+
+    def on_enter_character(self, event):
+        reply_token = event.reply_token
+        text = ""
+        if event.message.text == "fry cook":
+            text += "$Spongebob works as a fry cook at the Krusty Krab, a job which he is exceptionally skilled at and enjoys thoroughly. "
+            TocMachine.feedbackreceiver = "Spongebob"
+        elif event.message.text == "delivery man":
+            text += "$Patrick works as a delivery man at the Krusty Krab, a job which he send food to customers personally."
+            TocMachine.feedbackreceiver = "Patrick"
+        elif event.message.text == "cashier":
+            text += "$Squidward works as a cashier at the Krusty Krab, a job which he is not good at and hates it."
+            TocMachine.feedbackreceiver = "Squidward"
+        elif event.message.text == "boss":
+            text += "$Mr. crab works as a boss at the Krusty Krab, a job which he is good at and enjoys it."
+            TocMachine.feedbackreceiver = "Mr. crab"
+        text += "\nInput your feedback to "+TocMachine.feedbackreceiver+"!!!"
+        send_text_message(reply_token, text,TocMachine.hamburgeremoji)
+
+    def on_enter_email(self, event):
+        print("email")
+        reply_token = event.reply_token
+        print(event.message.text)
+        text1 = event.message.text
+        send_email(TocMachine.feedbackreceiver,text1,reply_token)
         self.go_back()

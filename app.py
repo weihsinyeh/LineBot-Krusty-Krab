@@ -15,84 +15,59 @@ load_dotenv()
 
 machine = TocMachine(
     states=[
-        "menu",
-        "about",
         "user",
         "cancel",
-        "order_food",
-        "order_name",
-        "order_num",
-        "order_success",
+        "about",
+        "menu",
+        "order_food", "order_name", "order_num", "order_success",
+        "weather",
+        "address",
+        "vehicle",
+        "way_of_eat",
+        "contact",
+        "feedback","character","email",
     ],
     transitions=[
-        #  訂餐流程
-        {
-            "trigger": "advance",
-            "source": "user",
-            "dest": "order_food",
-            "conditions": "is_going_to_order_food",
-        },
-        {
-            "trigger": "advance",
-            "source": "order_food",
-            "dest": "order_name",
-            "conditions": "is_going_to_order_name",
-        },
-        {
-            "trigger": "advance",
-            "source": "order_name",
-            "dest": "order_num",
-            "conditions": "is_going_to_order_num",
-        },
-        {
-            "trigger": "advance",
-            "source": "order_num",
-            "dest": "order_success",
-            "conditions": "is_going_to_order_success",
-        },
-        {"trigger": "advance", "source": "order_success", "dest": "user",},
-        {"trigger": "go_add_food", "source": "order_success", "dest": "order_food"},
-        # 取消訂餐
-        {
-            "trigger": "go_cancel",
-            "source": ["order_success", "order_food", "order_name", "order_num"],
-            "dest": "cancel",
-        },
-        {
-            "trigger": "advance",
-            "source": "user",
-            "dest": "cancel",
-            "conditions": "is_going_to_cancel",
-        },
-        {"trigger": "advance", "source": "cancel1", "dest": "user",},
-        # about
-        {
-            "trigger": "advance",
-            "source": "user",
-            "dest": "about",
-            "conditions": "is_going_to_about",
-        },
-        # menu
-        {
-            "trigger": "advance",
-            "source": "user",
-            "dest": "menu",
-            "conditions": "is_going_to_menu",
-        },
-        # go back
-        {
-            "trigger": "go_back",
-            "source": [
-                "order_food",
-                "order_name",
-                "order_num",
-                "order_success",
-                "cancel",
-                "about",
-                "menu",
-            ],
-            "dest": "user",
-        },
+        ### Feature1 : about us
+        {   "trigger": "advance",   "source": "user",   "dest": "about",    "conditions": "is_going_to_about",  },
+        ### Feature2 : menu
+        {   "trigger": "advance",   "source": "user",   "dest": "menu",     "conditions": "is_going_to_menu",  },
+        ### Feature3 : order
+        {   "trigger": "advance",   "source": "user",       "dest": "order_food",   "conditions": "is_going_to_order_food",},
+        {   "trigger": "advance",   "source": "order_food", "dest": "order_name",   "conditions": "is_going_to_order_name",},
+        {   "trigger": "advance",   "source": "order_name", "dest": "order_num",    "conditions": "is_going_to_order_num",},
+        {   "trigger": "advance",   "source": "order_num",  "dest": "order_success","conditions": "is_going_to_order_success",},
+        {   "trigger": "advance",   "source": "order_success", "dest": "user",},
+        {   "trigger": "go_add_food", "source": "order_success", "dest": "menu"},
+        ### cancel
+        {   "trigger": "go_cancel", "source": ["order_success", "order_food", "order_name", "order_num"],"dest": "cancel",},
+        {   "trigger": "advance",   "source": "user",   "dest": "cancel",   "conditions": "is_going_to_cancel", },
+        ### Feature 4 :Address
+        {   "trigger": "advance",   "source": "user",   "dest": "address",  "conditions": "is_going_to_address",},
+        ### Feature 5 : weather
+        {   "trigger": "advance",   "source": "user",   "dest": "weather",  "conditions": "is_going_to_weather",},
+        ### Feature 6 : way to eat food
+        {   "trigger": "advance",   "source": "user",   "dest": "way_of_eat","conditions": "is_going_to_way_of_eat",},
+        ### Feature 7 : vehicle
+        {   "trigger": "advance",   "source": "user",   "dest": "vehicle",  "conditions": "is_going_to_vehicle", },
+        ### Feature 8 : contact
+        {   "trigger": "advance",   "source": "user",   "dest": "contact",  "conditions": "is_going_to_contact", },
+        ### Feature 9 : feedback
+        {   "trigger": "advance",   "source": "user",   "dest": "feedback",  "conditions": "is_going_to_feedback", },
+        {   "trigger": "advance",   "source": "feedback",   "dest": "character",  "conditions": "is_going_to_character", },
+        {   "trigger": "advance",   "source": "character",   "dest": "email",  "conditions": "is_going_to_email", },
+        {   "trigger": "advance",   "source": "email",   "dest": "user", },
+        ### go back
+        {   "trigger": "go_back",   "source": ["cancel"
+                                                "about",
+                                                "menu",
+                                                "order_food","order_name","order_num","order_success",
+                                                "email",
+                                                "address",
+                                                "weather",
+                                                "vehicle",
+                                                "contact",
+                                                "feedback",],"dest": "user",},
     ],
     initial="user",
     auto_transitions=False,
@@ -121,7 +96,6 @@ def callback():
     # get request body as text
     body = request.get_data(as_text=True)
     app.logger.info("Request body: " + body)
-
     # parse webhook body
     try:
         events = parser.parse(body, signature)
@@ -167,7 +141,7 @@ def webhook_handler():
         print(f"REQUEST BODY: \n{body}")
         response = machine.advance(event)
         if response == False:
-            send_text_message(event.reply_token, "Not Entering any State")
+            send_text_message(event.reply_token, "Not Entering any State",TocMachine.hamburgeremoji)
 
     return "OK"
 

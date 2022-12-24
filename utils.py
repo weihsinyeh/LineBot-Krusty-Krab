@@ -1,5 +1,8 @@
 import os
-
+import requests, json, time, statistics  # import statistics 函式庫
+from flask import Flask, request
+from flask_ngrok import run_with_ngrok
+from linebot import WebhookHandler
 from linebot import LineBotApi, WebhookParser
 from linebot.models import (
     MessageEvent,
@@ -14,46 +17,44 @@ from linebot.models import (
     ConfirmTemplate,
     PostbackTemplateAction,
     MessageTemplateAction,
+    ImageCarouselColumn,
+    ImageCarouselTemplate,
 )
 
 
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
 
 
-def send_text_message(reply_token, text):
+def send_text_message(reply_token, text,emoji):
     line_bot_api = LineBotApi(channel_access_token)
-    line_bot_api.reply_message(reply_token, TextSendMessage(text=text))
+    line_bot_api.reply_message(reply_token, TextSendMessage(text=text,emojis = emoji))
 
     return "OK"
 
 
-##關於我們
+### Feature1 : about us
 def send_about(reply_token):
     line_bot_api = LineBotApi(channel_access_token)
-
-    text1 = """老闆為尤金·H·蟹（蟹老闆）。
-    這家餐廳被認為是比奇堡「有史以來為飲食而建立的最好的飲食場所」，
-    餐廳的美味蟹堡非常出名。
+    text1 = """The restaurant was founded by Eugene H. Krabs, 
+    who invented its famous Krabby Patty sandwich.
+    The Krusty Krab is a prominent fast food restaurant in the underwater city of Bikini Bottom.
     """
+    img = "https://upload.wikimedia.org/wikipedia/zh/thumb/3/33/Krusty_Krab_230b.png/170px-Krusty_Krab_230b.png"
     message = [
-        TextSendMessage(text=text1),  # 蟹寶王簡介
-        ImageSendMessage(  # 蟹寶王圖片
-            original_content_url="https://upload.wikimedia.org/wikipedia/zh/thumb/3/33/Krusty_Krab_230b.png/170px-Krusty_Krab_230b.png",
-            preview_image_url="https://upload.wikimedia.org/wikipedia/zh/thumb/3/33/Krusty_Krab_230b.png/170px-Krusty_Krab_230b.png",
+        TextSendMessage(text=text1), 
+        ImageSendMessage(  
+            original_content_url=img,
+            preview_image_url=img,
         ),
     ]
     line_bot_api.reply_message(reply_token, message)
-
     return "OK"
 
-
-##關於我們
+### Feature2 : menu
 def send_menu(reply_token):
     line_bot_api = LineBotApi(channel_access_token)
 
-    text1 = """蟹寶王的菜單有："""
     message = [
-        TextSendMessage(text=text1),  # 蟹寶王簡介
         ImageSendMessage(  # 蟹寶王圖片
             original_content_url="https://i.imgur.com/uMGtgqa.png",
             preview_image_url="https://i.imgur.com/uMGtgqa.png",
@@ -61,12 +62,12 @@ def send_menu(reply_token):
         TemplateSendMessage(
             alt_text="Buttons template",
             template=ButtonsTemplate(
-                title="類別!!!",
-                text="分為以下主食與飲料:",
+                title="Menu!!!",
+                text="We habe MainFood, Meal and Drink.",
                 actions=[
-                    MessageTemplateAction(label="@主食", text="@主食"),
-                    MessageTemplateAction(label="@套餐", text="@套餐"),
-                    MessageTemplateAction(label="@飲料", text="@飲料"),
+                    MessageTemplateAction(label="main food", text="main food"),
+                    MessageTemplateAction(label="meal", text="meal"),
+                    MessageTemplateAction(label="drink", text="drink"),
                 ],
             ),
         ),
@@ -75,61 +76,185 @@ def send_menu(reply_token):
 
     return "OK"
 
-
-### 使用說明
-def send_use(reply_token):
+### Feature3 : order
+def send_food(reply_token,index):
+    text1=""
+    if(index==0):
+        img = "https://i.imgur.com/V0PlZBt.png"
+        text1 = "$Please enter the number of the Main food you want to order:"
+    elif(index==1):
+        img = "https://i.imgur.com/i7oh34p.png"
+        text1 = "$Please enter the number of the Meal you want to order:"
+    elif(index==2):
+        img =  "https://i.imgur.com/uETir3s.png"
+        text1 = "$Please enter the number of the Drink you want to order:"
     line_bot_api = LineBotApi(channel_access_token)
-
-    text1 = """
-1. 「房間預約」及「取消訂房」可預訂及取消訂房。每個 LINE 帳號只能進行一個預約記錄。
-2. 「關於我們」對國立成功大學做簡單介紹及旅館圖片。
-3. 「位置資料」列出旅館地址，並會顯示地圖。
-4. 「聯絡我們」可直接撥打電話與我們聯繫。
-
-輸入「查看功能」即可完成show fsm ，查詢訂房的功能
-輸入「show fsm」查看有限狀態機的圖片
-輸入「查詢訂房」查看你現在的訂房狀態
-
-輸入「意見回饋 "主旨" "內容"」即可將你的意見打包成email寄給我喔喔!
-               """
-    message = TextSendMessage(text=text1)
-    line_bot_api.reply_message(reply_token, message)
-
-    return "OK"
-
-
-### 位置資訊
-def send_address(reply_token):
-    line_bot_api = LineBotApi(channel_access_token)
-
-    text1 = "成功大學店 701台南市東區大學路1號"
+    emoji = [
+        {
+            "index": 0, "productId": "5ac2211e031a6752fb806d61", "emojiId": "001"
+        },
+    ]
     message = [
-        TextSendMessage(text=text1),  # 顯示地址
-        LocationSendMessage(  # 顯示地圖
-            title="成功大學", address=text1, latitude=23.000614, longitude=120.217794
-        ),
+        ImageSendMessage( original_content_url=img, preview_image_url=img, ),
+        TextSendMessage(text=text1, emojis=emoji),  
     ]
     line_bot_api.reply_message(reply_token, message)
-
     return "OK"
 
+### Feature 4 : address
+def send_address(reply_token):
+    img = "https://i.imgur.com/WTB6dNt.png"
+    line_bot_api = LineBotApi(channel_access_token)
+    text1 = "Krusty Krab restaurant"
+    message = [ImageSendMessage( original_content_url=img, preview_image_url=img, ),
+                LocationSendMessage(  title = "Krusty Krab",  address = text1,  latitude = 23.000614, longitude = 120.217794),]
+    line_bot_api.reply_message(reply_token,message)
 
-### 聯絡我們
+### Feature 5 : weather  
+def send_weather(reply_token):
+    line_bot_api = LineBotApi(channel_access_token)
+    url = "https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-2198F064-C34A-4066-88EA-48ED62190CE1"
+    params = {
+        "Authorization": "CWB-2198F064-C34A-4066-88EA-48ED62190CE1",
+        "locationName": "臺南市",
+    }
+
+    response = requests.get(url, params=params)
+    print(response.status_code)
+
+    if response.status_code == 200:
+        # print(response.text)
+        data = json.loads(response.text)
+        weather_elements = data["records"]["location"][0]["weatherElement"]
+        start_time = weather_elements[0]["time"][0]["startTime"]
+        weather_state = weather_elements[0]["time"][0]["parameter"]["parameterName"]
+        rain_prob = weather_elements[1]["time"][0]["parameter"]["parameterName"]
+        min_tem = weather_elements[2]["time"][0]["parameter"]["parameterName"]
+        comfort = weather_elements[3]["time"][0]["parameter"]["parameterName"]
+        max_tem = weather_elements[4]["time"][0]["parameter"]["parameterName"]
+        emojis = [
+            {"index": 6, "productId": "5ac21542031a6752fb806d55", "emojiId": "001"},
+            {"index": 164, "productId": "5ac21d59031a6752fb806d5d", "emojiId": "001"},
+        ]
+        text1 =  "Bikini Bottom:"+start_time +"\nWeather"+weather_state +"\n"
+        text1 += "The Prob Of Rain: "+rain_prob +"\n"
+        text1 += "Lowest Temperature: "+min_tem +"\n"
+        text1 += "Comfort: "+comfort +"\n"
+        text1 += "Highest Temperature: "+max_tem +"\n" 
+        graph = ""
+        if("雨" in weather_state):
+            text1 += "\nThe weather in Bikini Bottom is bad today,you can call delivery!!"
+            graph="https://i.redd.it/fq8dqc4p00671.gif"
+        else:
+            text1 += "\nThe weather in Bikini Bottom is fine today,you can go out to Krusty Krab to enjoy the scenery and delicious meals!"
+            graph="https://i.imgur.com/QOJCUmT.png"
+
+        message = [
+            TextSendMessage(text=text1,emoji = emojis[1]),  # 蟹寶王簡介
+            TemplateSendMessage(
+                alt_text="Buttons template",
+                template=ButtonsTemplate(
+                    thumbnail_image_url=graph,
+                    title="Way Of Eating!!!",
+                    text="For here or to Go",
+                    actions=[
+                        MessageTemplateAction(label="deliver", text="deliver"),
+                        MessageTemplateAction(label="for here", text="for here"),
+                        MessageTemplateAction(label="vehicle", text="vehicle"),
+                    ],
+                ),
+            ),
+        ]   
+        line_bot_api.reply_message(reply_token, message)
+    else:
+        print("Can't get data!")
+### Feature 6 : way of eating
+def send_deliver(reply_token):
+    hamburgeremoji = [{"index": 0, "productId": "5ac2211e031a6752fb806d61", "emojiId": "001"},]
+    line_bot_api = LineBotApi(channel_access_token)
+    text1 = "$Please wait patiently"
+    message = [
+            TextSendMessage(text=text1, emojis=hamburgeremoji), 
+            TemplateSendMessage(
+                alt_text="Buttons template",
+                template=ButtonsTemplate(
+                    thumbnail_image_url= "https://i.imgur.com/polyRYa.png",
+                    title="Kill time!!!",
+                    text="Video or Audio",
+                    actions=[
+                        MessageTemplateAction(label="video", text="video"),
+                        MessageTemplateAction(label="audio", text="audio"),
+                        MessageTemplateAction(label="feedback", text="feedback"),
+                    ],
+                ),
+            ),
+        ]   
+    line_bot_api.reply_message(reply_token, message)  
+### Feature 7 : Vehicle
+def send_vehicle(reply_token):
+    line_bot_api = LineBotApi(channel_access_token)     
+    KrustyKruiser = 'https://static.wikia.nocookie.net/spongebob/images/9/98/The_Krusty_Kruiser.png'
+    Pineapple = 'https://static.wikia.nocookie.net/spongebob/images/4/45/Pineapple_RV_119.png'
+    JellyAngler = 'https://static.wikia.nocookie.net/spongebob/images/9/9f/The_Jelly_Life_195.png'
+    Bus = 'https://static.wikia.nocookie.net/spongebob/images/1/1f/Bus_stock_art.png'
+    PattyWagon = 'https://static.wikia.nocookie.net/spongebob/images/2/2c/The_Wagon.png'
+    Unicycle='https://static.wikia.nocookie.net/spongebob/images/7/76/SpongeBob-unicycle-promo.png'
+    ShellCart = 'https://static.wikia.nocookie.net/spongebob/images/e/e4/Paper14.png'
+    MobileKrustyKrab = 'https://static.wikia.nocookie.net/spongebob/images/2/29/20%2C000_Patties_Under_the_Sea_072.png'
+    KrustySpongeFunTrain = 'https://static.wikia.nocookie.net/spongebob/images/4/4e/Train1_Stitch_Stitch.jpg'
+    Image_Carousel = TemplateSendMessage(
+    alt_text='目錄 template',
+    template=ImageCarouselTemplate(
+    columns=[
+            ImageCarouselColumn(image_url=KrustyKruiser,action=MessageTemplateAction(label='Food truck',text='Food truck',)),
+            ImageCarouselColumn(image_url=Pineapple,action=MessageTemplateAction(label='Pine apple',text='Pine apple',)),
+            ImageCarouselColumn(image_url=JellyAngler,action=MessageTemplateAction(label='JellyAngler',text='JellyAngler',)),
+            ImageCarouselColumn(image_url=Bus,action=MessageTemplateAction(label='Bus',text='Bus',)),
+            ImageCarouselColumn(image_url=PattyWagon,action=MessageTemplateAction(label='PattyWagon',text='PattyWagon',)),
+            ImageCarouselColumn(image_url=Unicycle,action=MessageTemplateAction(label='Unicycle',text='Unicycle',)),
+            ImageCarouselColumn(image_url=MobileKrustyKrab,action=MessageTemplateAction(label='KrustyKrab',text='KrustyKrab',)),
+            ImageCarouselColumn(image_url=KrustySpongeFunTrain,action=MessageTemplateAction(label='Train',text='Train',)),
+            ImageCarouselColumn(image_url=ShellCart,action=MessageTemplateAction(label='ShellCart',text='ShellCart',)),
+        ]
+    )
+    )
+    line_bot_api.reply_message(reply_token,Image_Carousel)
+    return 'OK'
+
+### Feature 8 : Contact
 def send_contact(reply_token):
     line_bot_api = LineBotApi(channel_access_token)
-
     message = TemplateSendMessage(
-        alt_text="聯絡我們",
+        alt_text="Contact us",
         template=ButtonsTemplate(
             thumbnail_image_url="https://i.imgur.com/tVjKzPH.jpg",
-            title="聯絡我們",
-            text="打電話給我們",
-            actions=[URITemplateAction(label="撥打電話", uri="tel:0123456789")],  # 開啟打電話功能
+            title="Contact us",
+            text="0912345678",
+            actions=[URITemplateAction(label="Call", uri="tel:0123456789")],  # 開啟打電話功能
         ),
     )
     line_bot_api.reply_message(reply_token, message)
     return "OK"
 
+### Feature 9 : Feedback
+def send_feedback(reply_token):
+    line_bot_api = LineBotApi(channel_access_token)
+    Spongebob = 'https://i.imgur.com/tUfbHba.png'
+    Squidward = 'https://i.imgur.com/c9Vkeys.jpg'
+    Crab = 'https://i.imgur.com/ODsRvPc.png'
+    Patrick = 'https://i.imgur.com/KVVXhCv.png'
+    Image_Carousel = TemplateSendMessage(
+    alt_text='目錄 template',
+    template=ImageCarouselTemplate(
+        columns=[
+            ImageCarouselColumn(image_url=Spongebob,action=MessageTemplateAction(label='fry cook',text='fry cook',)),
+            ImageCarouselColumn(image_url=Squidward,action=MessageTemplateAction(label='cashier',text='cashier',)),
+            ImageCarouselColumn(image_url=Crab,action=MessageTemplateAction(label='boss',text='boss',)),
+            ImageCarouselColumn(image_url=Patrick,action=MessageTemplateAction(label='delivery man',text='delivery man',)),
+            ]
+        )
+    )
+    line_bot_api.reply_message(reply_token,Image_Carousel)
 
 ### show fsm
 def send_fsm(reply_token):
@@ -145,7 +270,6 @@ def send_fsm(reply_token):
 ### show breakfast
 def send_breakfast(reply_token):
     line_bot_api = LineBotApi(channel_access_token)
-
     message = TemplateSendMessage(
         alt_text="Buttons template",
         template=ButtonsTemplate(
@@ -159,7 +283,6 @@ def send_breakfast(reply_token):
     )
     line_bot_api.reply_message(reply_token, message)
     return "OK"
-
 
 ### show lobby
 def send_lobby(reply_token):
@@ -178,3 +301,4 @@ def send_lobby(reply_token):
     )
     line_bot_api.reply_message(reply_token, message)
     return "OK"
+
