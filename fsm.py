@@ -1,5 +1,7 @@
 from transitions.extensions import GraphMachine
 import os
+from os import name
+from typing import Text
 from linebot import LineBotApi, WebhookParser
 from linebot.models import (
     MessageEvent,
@@ -15,10 +17,17 @@ from linebot.models import (
     PostbackTemplateAction,
     MessageTemplateAction,
 )
-
-from utils import (send_menu,
-                    send_deliver,send_feedback,
-                    send_contact,send_text_message,send_about,send_weather,send_address,send_place,send_food,send_eathere,send_ticket)
+from utils import ( send_text_message,
+                    send_fsm,
+                    send_feature,
+                    send_about,
+                    send_menu,
+                    send_food,
+                    send_weather,
+                    send_deliver,
+                    send_feedback,
+                    send_contact,
+                    send_address,send_place,send_eathere,send_ticket)
 from emailweihsin import send_email
 class TocMachine(GraphMachine):
     new_order_index = 0
@@ -40,6 +49,14 @@ class TocMachine(GraphMachine):
     def is_going_to_cancel(self, event):
         text = event.message.text
         return text.lower() == "cancel"
+    ### Show feature menu
+    def is_going_to_feature(self, event):
+        text = event.message.text
+        return text.lower() == "feature"
+
+    def is_going_to_show_fsm(self, event):
+        text = event.message.text
+        return text.lower() == "show fsm"
 
     ### Feature1 : about us
     def is_going_to_about(self, event):
@@ -61,64 +78,67 @@ class TocMachine(GraphMachine):
         return text.lower() == "main food" or text.lower() == "meal" or text.lower() == "drink"
 
     def is_going_to_order_name(self, event):
-        text = event.message.text
         return True
     def is_going_to_order_num(self, event):
-        text = event.message.text
         return True
     def is_going_to_order_success(self, event):
-        text = event.message.text
         return True
 
-    ### Feature 4 :Address
+    ### Feature 4 :Address ################
     def is_going_to_address(self, event):
         text = event.message.text
         return text.lower() == "address"
 
-    ### Feature 5 : weather
+    ### Feature 5 : weather ###############
     def is_going_to_weather(self, event):
         text = event.message.text
         return text.lower() == "weather"
 
-    ### Feature 6 : way to eat food
+    ### Feature 6 : way to eat food ##################################
     def is_going_to_way_of_eat(self, event):
         text = event.message.text
         return text.lower() == "for here" or text.lower() == "deliver"
 
-    ### Feature 7 : Vehicle
+    ### Feature 7 : Vehicle ############
     def is_going_to_bus(self, event):
         text = event.message.text
-        return text.lower() == "bus"
+        return text.lower() == "bus" 
     def is_going_to_ticket(self, event):
-        text = event.message.text
         return True
 
-    ### Feature 8 : Contact
+    ### Feature 8 : Contact #############
     def is_going_to_contact(self, event):
         text = event.message.text
         return text.lower() == "contact"
 
-    ### Feature 9 : Feedback
+    ### Feature 9 : Feedback #############
     def is_going_to_feedback(self, event):
         text = event.message.text
         return text.lower() == "feedback"
     def is_going_to_character(self, event):
-        text = event.message.text
         return True
     def is_going_to_email(self, event):
-        text = event.message.text
         return True
+
+    ### Show Feature Menu
+    def on_enter_feature(self,event):
+        reply_token = event.reply_token
+        send_feature(reply_token)
+        self.go_back()
 
     ### Cancel
     def on_enter_cancel(self, event):
         reply_token = event.reply_token
         send_text_message(reply_token, "$Dear customer, you have canceled the order",TocMachine.hamburgeremoji)
         self.go_back()
-
+    ### Show fsm
+    def on_enter_show_fsm(self, event):
+        reply_token = event.reply_token
+        send_fsm(reply_token)
+        self.go_back()
     ### Feature1 : about us
     def on_enter_about(self, event):
         reply_token = event.reply_token
-        send_text_message(reply_token, "$About Krabby Patty",TocMachine.hamburgeremoji)
         send_about(reply_token)
         self.go_back()
 
@@ -144,7 +164,7 @@ class TocMachine(GraphMachine):
         menu = TocMachine.menu
         TocMachine.new_order_index = int(event.message.text) - 1
         reply_token = event.reply_token
-        send_text_message( reply_token, "$You have ordered" + menu[menuindex][TocMachine.new_order_index][0] + \
+        send_text_message( reply_token, "$You have ordered : " + menu[menuindex][TocMachine.new_order_index][0] + \
                             "\nPlease input number:\n" "(If you want to cancel, input \"cancel\")",TocMachine.hamburgeremoji)
 
     def on_enter_order_num(self, event):  # 輸入餐點數量
@@ -166,7 +186,7 @@ class TocMachine(GraphMachine):
     def on_enter_order_success(self, event):
         menu = TocMachine.menu
         reply_token = event.reply_token
-        text = ""
+        text = "$Order Success!\nThe following is your current order:\n"
         if event.message.text == "sure":
             TocMachine.order_menu_list.append(menuindex)
             TocMachine.order_name_list.append(TocMachine.new_order_index)
@@ -180,7 +200,8 @@ class TocMachine(GraphMachine):
                     + " $" + str(pay) + "\n"
                 )
                 TocMachine.money += pay
-            send_text_message(reply_token, "$Order Success!\nThe following is your current order:\n" + text,TocMachine.hamburgeremoji)
+            text += "Total : $" + str(TocMachine.money)
+            send_text_message(reply_token, text,TocMachine.hamburgeremoji)
             self.go_back()
         elif event.message.text == "order more":
             TocMachine.order_menu_list.append(menuindex)

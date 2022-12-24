@@ -15,11 +15,11 @@ from linebot.models import (
     TemplateSendMessage,
     ButtonsTemplate,
     URITemplateAction,
-    ConfirmTemplate,
-    PostbackTemplateAction,
+    CarouselTemplate,
     MessageTemplateAction,
     ImageCarouselColumn,
     ImageCarouselTemplate,
+    CarouselColumn,
 )
 
 
@@ -32,21 +32,71 @@ def send_text_message(reply_token, text,emoji):
 
     return "OK"
 
+### show fsm
+def send_fsm(reply_token):
+    line_bot_api = LineBotApi(channel_access_token)
+    img  = 'https://i.imgur.com/xGdWMFd.png'
+    fsm = ImageSendMessage(
+            original_content_url=img,
+            preview_image_url=img
+        )
+    line_bot_api.reply_message(reply_token, fsm)
+    return "OK"
 
+def send_feature(reply_token):
+    message = TemplateSendMessage(
+        alt_text='Carousel template',
+        template=CarouselTemplate(
+            columns=[
+                CarouselColumn(
+                    thumbnail_image_url='https://i.imgur.com/qTGZ0up.png',
+                    title='Order Food For Here or Deliver',
+                    text='What would you like to watch?',
+                    actions=[
+                        MessageTemplateAction( label='What\'s on the menu?', text='menu' ),
+                        MessageTemplateAction( label='For Here!!!', text='for here' ),
+                        MessageTemplateAction( label='Deliver!!!', text='deliver' )
+                    ]
+                ),
+                CarouselColumn(
+                    thumbnail_image_url='https://i.imgur.com/i1uHF3i.jpg',
+                    title='Find Us or Go to Krusty Krab',
+                    text='What would you want to do?',
+                    actions=[
+                        MessageTemplateAction( label='Know weather!', text='weather' ),
+                        MessageTemplateAction( label='Where are we?', text='address' ),
+                        MessageTemplateAction( label='Take bus!', text='bus'),
+                    ]
+                ),
+                CarouselColumn(
+                    thumbnail_image_url='https://i.imgur.com/1yErAaK.png',
+                    title='Contact Us or Know More',
+                    text='What would you want to do?',
+                    actions=[
+                        MessageTemplateAction( label='Show me fsm!', text='show fsm' ),
+                        MessageTemplateAction( label='Call to Squidward!', text='contact' ),
+                        MessageTemplateAction( label='Give us feedback!', text='feedback' ),
+                    ]
+                ),
+            ]
+        )
+    )
+    line_bot_api = LineBotApi(channel_access_token)
+    line_bot_api.reply_message(reply_token, message)
+
+    return "OK"
 ### Feature1 : about us
 def send_about(reply_token):
+    hamburgeremoji = [{"index": 0, "productId": "5ac2211e031a6752fb806d61", "emojiId": "001"},]
     line_bot_api = LineBotApi(channel_access_token)
-    text1 = """The restaurant was founded by Eugene H. Krabs, 
-    who invented its famous Krabby Patty sandwich.
-    The Krusty Krab is a prominent fast food restaurant in the underwater city of Bikini Bottom.
-    """
-    img = "https://upload.wikimedia.org/wikipedia/zh/thumb/3/33/Krusty_Krab_230b.png/170px-Krusty_Krab_230b.png"
+    text1 =  "$About Krusty Krab\n"
+    text1 += "The restaurant was founded by Eugene H. Krabs,\n"
+    text1 += "who invented its famous Krabby Patty sandwich.\n"
+    text1 += "The Krusty Krab is a prominent fast food restaurant in the underwater city of Bikini Bottom."
+    img = "https://i.imgur.com/4dpgMlh.png"
     message = [
-        TextSendMessage(text=text1), 
-        ImageSendMessage(  
-            original_content_url=img,
-            preview_image_url=img,
-        ),
+        TextSendMessage(text=text1,emojis = hamburgeremoji), 
+        ImageSendMessage(  original_content_url=img,preview_image_url=img,),
     ]
     line_bot_api.reply_message(reply_token, message)
     return "OK"
@@ -54,17 +104,14 @@ def send_about(reply_token):
 ### Feature2 : menu
 def send_menu(reply_token):
     line_bot_api = LineBotApi(channel_access_token)
-
+    img = "https://i.imgur.com/uMGtgqa.png"
     message = [
-        ImageSendMessage(  # 蟹寶王圖片
-            original_content_url="https://i.imgur.com/uMGtgqa.png",
-            preview_image_url="https://i.imgur.com/uMGtgqa.png",
-        ),
+        ImageSendMessage(  original_content_url=img, preview_image_url=img,),
         TemplateSendMessage(
             alt_text="Buttons template",
             template=ButtonsTemplate(
                 title="Menu!!!",
-                text="We habe MainFood, Meal and Drink.",
+                text="We have MainFood, Meal and Drink.",
                 actions=[
                     MessageTemplateAction(label="main food", text="main food"),
                     MessageTemplateAction(label="meal", text="meal"),
@@ -74,30 +121,19 @@ def send_menu(reply_token):
         ),
     ]
     line_bot_api.reply_message(reply_token, message)
-
     return "OK"
 
 ### Feature3 : order
 def send_food(reply_token,index):
-    text1=""
-    if(index==0):
-        img = "https://i.imgur.com/V0PlZBt.png"
-        text1 = "$Please enter the number of the Main food you want to order:"
-    elif(index==1):
-        img = "https://i.imgur.com/i7oh34p.png"
-        text1 = "$Please enter the number of the Meal you want to order:"
-    elif(index==2):
-        img =  "https://i.imgur.com/uETir3s.png"
-        text1 = "$Please enter the number of the Drink you want to order:"
+    imgs = ["https://i.imgur.com/V0PlZBt.png","https://i.imgur.com/i7oh34p.png","https://i.imgur.com/uETir3s.png"]
+    texts = ["$Please enter the number of the Main food you want to order:",
+            "$Please enter the number of the Meal you want to order:",
+            "$Please enter the number of the Drink you want to order:"]
     line_bot_api = LineBotApi(channel_access_token)
-    emoji = [
-        {
-            "index": 0, "productId": "5ac2211e031a6752fb806d61", "emojiId": "001"
-        },
-    ]
+    emoji = [{"index": 0, "productId": "5ac2211e031a6752fb806d61", "emojiId": "001"},]
     message = [
-        ImageSendMessage( original_content_url=img, preview_image_url=img, ),
-        TextSendMessage(text=text1, emojis=emoji),  
+        ImageSendMessage( original_content_url=imgs[index], preview_image_url=imgs[index], ),
+        TextSendMessage(text=texts[index], emojis=emoji),  
     ]
     line_bot_api.reply_message(reply_token, message)
     return "OK"
@@ -113,13 +149,10 @@ def send_address(reply_token):
 
 ### Feature 5 : weather  
 def send_weather(reply_token):
+    hamburgeremoji = [{"index": 0, "productId": "5ac2211e031a6752fb806d61", "emojiId": "001"},]
     line_bot_api = LineBotApi(channel_access_token)
     url = "https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-2198F064-C34A-4066-88EA-48ED62190CE1"
-    params = {
-        "Authorization": "CWB-2198F064-C34A-4066-88EA-48ED62190CE1",
-        "locationName": "臺南市",
-    }
-
+    params = {"Authorization": "CWB-2198F064-C34A-4066-88EA-48ED62190CE1","locationName": "臺南市",}
     response = requests.get(url, params=params)
     print(response.status_code)
 
@@ -132,11 +165,7 @@ def send_weather(reply_token):
         min_tem = weather_elements[2]["time"][0]["parameter"]["parameterName"]
         comfort = weather_elements[3]["time"][0]["parameter"]["parameterName"]
         max_tem = weather_elements[4]["time"][0]["parameter"]["parameterName"]
-        emojis = [
-            {"index": 6, "productId": "5ac21542031a6752fb806d55", "emojiId": "001"},
-            {"index": 164, "productId": "5ac21d59031a6752fb806d5d", "emojiId": "001"},
-        ]
-        text1 =  "Bikini Bottom:"+start_time +"\nWeather"+weather_state +"\n"
+        text1 =  "$Bikini Bottom : "+start_time +"\nWeather"+weather_state +"\n"
         text1 += "The Prob Of Rain: "+rain_prob +"\n"
         text1 += "Lowest Temperature: "+min_tem +"\n"
         text1 += "Comfort: "+comfort +"\n"
@@ -150,7 +179,7 @@ def send_weather(reply_token):
             graph="https://i.imgur.com/QOJCUmT.png"
 
         message = [
-            TextSendMessage(text=text1,emoji = emojis[1]),  # 蟹寶王簡介
+            TextSendMessage(text=text1,emojis = hamburgeremoji),  # 蟹寶王簡介
             TemplateSendMessage(
                 alt_text="Buttons template",
                 template=ButtonsTemplate(
@@ -170,19 +199,15 @@ def send_weather(reply_token):
 ### Feature 6 : way of eating
 def send_eathere(reply_token):
     line_bot_api = LineBotApi(channel_access_token)
+    img = "https://i.imgur.com/44wzquJ.png"
     message = TemplateSendMessage(
             alt_text='ConfirmTemplate',
-            template=ConfirmTemplate(
+            template=ButtonsTemplate(
+                thumbnail_image_url=img,
                 text='Which way do you prefer to go to Krusty Krab?',
                 actions=[
-                    MessageAction(
-                        label='walk',
-                        text='walk'
-                    ),
-                    MessageAction(
-                        label='bus',
-                        text='bus'
-                    )
+                    MessageAction(label='Just Walk', text='walk'),
+                    MessageAction(label='Take A Bus',text='bus'),
                 ]
             )
         )
@@ -201,9 +226,9 @@ def send_deliver(reply_token):
                     title="Kill time!!!",
                     text="Know more about us",
                     actions=[
-                        MessageTemplateAction(label="about us", text="about us"),
-                        MessageTemplateAction(label="contact", text="contact"),
-                        MessageTemplateAction(label="feedback", text="feedback"),
+                        MessageTemplateAction(label="Know more about Us", text="about us"),
+                        MessageTemplateAction(label="Call to Squidward!", text="contact"),
+                        MessageTemplateAction(label="Give us Feedback", text="feedback"),
                     ],
                 ),
             ),
@@ -241,6 +266,7 @@ def send_place(reply_token):
     return 'OK'
 
 def send_ticket(reply_token,index):
+    hamburgeremoji = [{"index": 0, "productId": "5ac2211e031a6752fb806d61", "emojiId": "001"},]
     ticket = [[7,5],[10,7],[13,9],[5,3],[8,6],[9,6],[10,7],[15,12],[20,15]]
     text2 = ["$Stop : Pineapple House\nSpongeBob lives here",
                  "$Stop : Squidward Tentacles' house\n:Squidward lives here",
@@ -255,11 +281,8 @@ def send_ticket(reply_token,index):
     text1 = text2[index] + "\nTicket price: " + str(ticket[index][0]) + "\n" + "Time to pass : " + str(ticket[index][1])
     img = "https://i.imgur.com/6rCJ1Ik.png"
     message = [
-        ImageSendMessage(  
-            original_content_url=img,
-            preview_image_url=img,
-        ),
-        TextSendMessage(text=text1), 
+        ImageSendMessage(original_content_url=img,preview_image_url=img,),
+        TextSendMessage(text=text1, emojis=hamburgeremoji), 
     ]
     line_bot_api = LineBotApi(channel_access_token)
     line_bot_api.reply_message(reply_token, message)
@@ -269,10 +292,10 @@ def send_ticket(reply_token,index):
 def send_contact(reply_token):
     line_bot_api = LineBotApi(channel_access_token)
     message = TemplateSendMessage(
-        alt_text="Contact us",
+        alt_text="Call to Squidward!",
         template=ButtonsTemplate(
-            thumbnail_image_url="https://i.imgur.com/tVjKzPH.jpg",
-            title="Contact us",
+            thumbnail_image_url="https://i.imgur.com/1yErAaK.png",
+            title="Call to Squidward!",
             text="0912345678",
             actions=[URITemplateAction(label="Call", uri="tel:0123456789")],  # 開啟打電話功能
         ),
@@ -301,15 +324,6 @@ def send_feedback(reply_token):
     line_bot_api.reply_message(reply_token,Image_Carousel)
     return "OK"
 
-### show fsm
-def send_fsm(reply_token):
-    line_bot_api = LineBotApi(channel_access_token)
-    fsm = ImageSendMessage(
-        original_content_url="https://i.imgur.com/csunAds.png",
-        preview_image_url="https://i.imgur.com/csunAds.png",
-    )
-    line_bot_api.reply_message(reply_token, fsm)
-    return "OK"
 
 
 
