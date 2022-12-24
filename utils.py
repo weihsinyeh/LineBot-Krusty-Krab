@@ -9,6 +9,7 @@ from linebot.models import (
     TextMessage,
     TextSendMessage,
     PostbackEvent,
+    MessageAction,
     ImageSendMessage,
     LocationSendMessage,
     TemplateSendMessage,
@@ -123,7 +124,6 @@ def send_weather(reply_token):
     print(response.status_code)
 
     if response.status_code == 200:
-        # print(response.text)
         data = json.loads(response.text)
         weather_elements = data["records"]["location"][0]["weatherElement"]
         start_time = weather_elements[0]["time"][0]["startTime"]
@@ -160,7 +160,6 @@ def send_weather(reply_token):
                     actions=[
                         MessageTemplateAction(label="deliver", text="deliver"),
                         MessageTemplateAction(label="for here", text="for here"),
-                        MessageTemplateAction(label="vehicle", text="vehicle"),
                     ],
                 ),
             ),
@@ -169,6 +168,26 @@ def send_weather(reply_token):
     else:
         print("Can't get data!")
 ### Feature 6 : way of eating
+def send_eathere(reply_token):
+    line_bot_api = LineBotApi(channel_access_token)
+    message = TemplateSendMessage(
+            alt_text='ConfirmTemplate',
+            template=ConfirmTemplate(
+                text='Which way do you prefer to go to Krusty Krab?',
+                actions=[
+                    MessageAction(
+                        label='walk',
+                        text='walk'
+                    ),
+                    MessageAction(
+                        label='bus',
+                        text='bus'
+                    )
+                ]
+            )
+        )
+    line_bot_api.reply_message(reply_token, message)
+    
 def send_deliver(reply_token):
     hamburgeremoji = [{"index": 0, "productId": "5ac2211e031a6752fb806d61", "emojiId": "001"},]
     line_bot_api = LineBotApi(channel_access_token)
@@ -180,45 +199,70 @@ def send_deliver(reply_token):
                 template=ButtonsTemplate(
                     thumbnail_image_url= "https://i.imgur.com/polyRYa.png",
                     title="Kill time!!!",
-                    text="Video or Audio",
+                    text="Know more about us",
                     actions=[
-                        MessageTemplateAction(label="video", text="video"),
-                        MessageTemplateAction(label="audio", text="audio"),
+                        MessageTemplateAction(label="about us", text="about us"),
+                        MessageTemplateAction(label="contact", text="contact"),
                         MessageTemplateAction(label="feedback", text="feedback"),
                     ],
                 ),
             ),
         ]   
     line_bot_api.reply_message(reply_token, message)  
-### Feature 7 : Vehicle
-def send_vehicle(reply_token):
+### Feature 7 : place
+def send_place(reply_token):
     line_bot_api = LineBotApi(channel_access_token)     
-    KrustyKruiser = 'https://static.wikia.nocookie.net/spongebob/images/9/98/The_Krusty_Kruiser.png'
-    Pineapple = 'https://static.wikia.nocookie.net/spongebob/images/4/45/Pineapple_RV_119.png'
-    JellyAngler = 'https://static.wikia.nocookie.net/spongebob/images/9/9f/The_Jelly_Life_195.png'
-    Bus = 'https://static.wikia.nocookie.net/spongebob/images/1/1f/Bus_stock_art.png'
-    PattyWagon = 'https://static.wikia.nocookie.net/spongebob/images/2/2c/The_Wagon.png'
-    Unicycle='https://static.wikia.nocookie.net/spongebob/images/7/76/SpongeBob-unicycle-promo.png'
-    ShellCart = 'https://static.wikia.nocookie.net/spongebob/images/e/e4/Paper14.png'
-    MobileKrustyKrab = 'https://static.wikia.nocookie.net/spongebob/images/2/29/20%2C000_Patties_Under_the_Sea_072.png'
-    KrustySpongeFunTrain = 'https://static.wikia.nocookie.net/spongebob/images/4/4e/Train1_Stitch_Stitch.jpg'
+    pineapple =  'https://i.imgur.com/ovQiTDM.png'
+    stone =      'https://i.imgur.com/1yrXe8l.jpg'
+    rock =       'https://i.imgur.com/PEcNGC2.png'
+    chumbucket = 'https://i.imgur.com/H331Ywr.png'
+    sandyhouse = 'https://i.imgur.com/nKAOYQ4.png'
+    Jellyfish=   'https://i.imgur.com/sL1eZDm.png'
+    Bank =       'https://i.imgur.com/rHG5giy.png'
+    School =     'https://i.imgur.com/LDQW5J8.png'
+    KrustyKrab = 'https://i.imgur.com/4dpgMlh.png'
     Image_Carousel = TemplateSendMessage(
     alt_text='目錄 template',
     template=ImageCarouselTemplate(
     columns=[
-            ImageCarouselColumn(image_url=KrustyKruiser,action=MessageTemplateAction(label='Food truck',text='Food truck',)),
-            ImageCarouselColumn(image_url=Pineapple,action=MessageTemplateAction(label='Pine apple',text='Pine apple',)),
-            ImageCarouselColumn(image_url=JellyAngler,action=MessageTemplateAction(label='JellyAngler',text='JellyAngler',)),
-            ImageCarouselColumn(image_url=Bus,action=MessageTemplateAction(label='Bus',text='Bus',)),
-            ImageCarouselColumn(image_url=PattyWagon,action=MessageTemplateAction(label='PattyWagon',text='PattyWagon',)),
-            ImageCarouselColumn(image_url=Unicycle,action=MessageTemplateAction(label='Unicycle',text='Unicycle',)),
-            ImageCarouselColumn(image_url=MobileKrustyKrab,action=MessageTemplateAction(label='KrustyKrab',text='KrustyKrab',)),
-            ImageCarouselColumn(image_url=KrustySpongeFunTrain,action=MessageTemplateAction(label='Train',text='Train',)),
-            ImageCarouselColumn(image_url=ShellCart,action=MessageTemplateAction(label='ShellCart',text='ShellCart',)),
+            ImageCarouselColumn(image_url=KrustyKrab,action=MessageTemplateAction(label='KrustyKrab',text='KrustyKrab',)),
+            ImageCarouselColumn(image_url=pineapple,action=MessageTemplateAction(label='pineapple',text='pineapple',)),
+            ImageCarouselColumn(image_url=stone,action=MessageTemplateAction(label='stone',text='stone',)),
+            ImageCarouselColumn(image_url=rock,action=MessageTemplateAction(label='rock',text='rock',)),
+            ImageCarouselColumn(image_url=chumbucket,action=MessageTemplateAction(label='chum bucket',text='chum bucket',)),
+            ImageCarouselColumn(image_url=sandyhouse,action=MessageTemplateAction(label='sandy house',text='sandy house',)),
+            ImageCarouselColumn(image_url=Jellyfish,action=MessageTemplateAction(label='jellyfish',text='jellyfish',)),
+            ImageCarouselColumn(image_url=Bank,action=MessageTemplateAction(label='bank',text='bank',)),
+            ImageCarouselColumn(image_url=School,action=MessageTemplateAction(label='school',text='school',)),
         ]
     )
     )
     line_bot_api.reply_message(reply_token,Image_Carousel)
+    return 'OK'
+
+def send_ticket(reply_token,index):
+    ticket = [[7,5],[10,7],[13,9],[5,3],[8,6],[9,6],[10,7],[15,12],[20,15]]
+    text2 = ["$Stop : Pineapple House\nSpongeBob lives here",
+                 "$Stop : Squidward Tentacles' house\n:Squidward lives here",
+                 "$Stop : Rock House\n:Patrick lives here",
+                 "$Stop : Chum Bucket\nThe Chum Bucket is normally unable to compete with the Krusty Krab because it mostly serves awful and foul-tasting foods made from chum, so it rarely gets any customers.",
+                 "$Stop : Sandy House\nSandy lives here",
+                 "$Stop : Jellyfish Field\nThere are a lot of jellyfish here, and SpongeBob often comes here to collect them.",
+                 "$Stop : Bank\nThe bank of Bikini Botton",
+                 "$Stop : School\nThe school of Bikini Bottom. Puff teaches here.",
+                 "$Stop : Krusty Krab\nThe Krusty Krab is a fast food restaurant located in Bikini Bottom"
+                 ]
+    text1 = text2[index] + "\nTicket price: " + str(ticket[index][0]) + "\n" + "Time to pass : " + str(ticket[index][1])
+    img = "https://i.imgur.com/6rCJ1Ik.png"
+    message = [
+        ImageSendMessage(  
+            original_content_url=img,
+            preview_image_url=img,
+        ),
+        TextSendMessage(text=text1), 
+    ]
+    line_bot_api = LineBotApi(channel_access_token)
+    line_bot_api.reply_message(reply_token, message)
     return 'OK'
 
 ### Feature 8 : Contact
@@ -255,6 +299,7 @@ def send_feedback(reply_token):
         )
     )
     line_bot_api.reply_message(reply_token,Image_Carousel)
+    return "OK"
 
 ### show fsm
 def send_fsm(reply_token):
@@ -267,38 +312,4 @@ def send_fsm(reply_token):
     return "OK"
 
 
-### show breakfast
-def send_breakfast(reply_token):
-    line_bot_api = LineBotApi(channel_access_token)
-    message = TemplateSendMessage(
-        alt_text="Buttons template",
-        template=ButtonsTemplate(
-            title="最後一問!!!",
-            text="飯店有提供早餐，請選擇早餐",
-            actions=[
-                MessageTemplateAction(label="中式", text="中式"),
-                MessageTemplateAction(label="西式", text="西式"),
-            ],
-        ),
-    )
-    line_bot_api.reply_message(reply_token, message)
-    return "OK"
-
-### show lobby
-def send_lobby(reply_token):
-    line_bot_api = LineBotApi(channel_access_token)
-
-    message = TemplateSendMessage(
-        alt_text="Buttons template",
-        template=ButtonsTemplate(
-            title="其他功能",
-            text="知識是光，善良是影",
-            actions=[
-                MessageTemplateAction(label="show fsm", text="show fsm"),
-                MessageTemplateAction(label="查詢訂房", text="查詢訂房"),
-            ],
-        ),
-    )
-    line_bot_api.reply_message(reply_token, message)
-    return "OK"
 

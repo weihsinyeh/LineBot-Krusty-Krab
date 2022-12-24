@@ -18,7 +18,7 @@ from linebot.models import (
 
 from utils import (send_menu,
                     send_deliver,send_feedback,
-                    send_contact,send_text_message,send_about,send_fsm,send_lobby,send_weather,send_address,send_vehicle,send_food,)
+                    send_contact,send_text_message,send_about,send_weather,send_address,send_place,send_food,send_eathere,send_ticket)
 from emailweihsin import send_email
 class TocMachine(GraphMachine):
     new_order_index = 0
@@ -49,7 +49,7 @@ class TocMachine(GraphMachine):
     ### Feature2 : menu
     def is_going_to_menu(self, event):
         text = event.message.text
-        return text.lower() == "menu" or text.lower() == "order" or text.lower() == "order"
+        return text.lower() == "menu" or text.lower() == "order" 
 
     ### Feature3 : order
     def is_going_to_order_food(self, event):
@@ -63,11 +63,9 @@ class TocMachine(GraphMachine):
     def is_going_to_order_name(self, event):
         text = event.message.text
         return True
-
     def is_going_to_order_num(self, event):
         text = event.message.text
         return True
-
     def is_going_to_order_success(self, event):
         text = event.message.text
         return True
@@ -88,18 +86,18 @@ class TocMachine(GraphMachine):
         return text.lower() == "for here" or text.lower() == "deliver"
 
     ### Feature 7 : Vehicle
-    def is_going_to_vehicle(self, event):
+    def is_going_to_bus(self, event):
         text = event.message.text
-        return text.lower() == "vehicle"
-
-    def is_goint_to_vehicle_detail(self,event):
+        return text.lower() == "bus"
+    def is_going_to_ticket(self, event):
         text = event.message.text
-        return text.lower() == "Food trunk"
+        return True
 
     ### Feature 8 : Contact
     def is_going_to_contact(self, event):
         text = event.message.text
         return text.lower() == "contact"
+
     ### Feature 9 : Feedback
     def is_going_to_feedback(self, event):
         text = event.message.text
@@ -209,20 +207,34 @@ class TocMachine(GraphMachine):
     def on_enter_way_of_eat(self, event):
         reply_token = event.reply_token
         if(event.message.text == "for here"):
-            send_text_message(reply_token, "$You have chosen to eat here",TocMachine.hamburgeremoji)
+            send_eathere(reply_token)
         elif(event.message.text == "deliver"):
             if(TocMachine.money == 0):
-                send_text_message(reply_token, "$You have to order food!",TocMachine.hamburgeremoji)
+                send_text_message(reply_token, "$You have to order food!\nInput \"menu\" to see what to eat",TocMachine.hamburgeremoji)
             else:
                 send_deliver(reply_token)
         self.go_back()
-
-    ### Feature 7 : vehicle
-    def on_enter_vehicle(self, event):  
+    ### Feature 7 : place
+    def on_enter_bus(self, event):  
+        print("bus")
         reply_token = event.reply_token
-        send_vehicle(reply_token)
-        self.go_back()
+        send_place(reply_token)
         
+    def on_enter_ticket(self, event):
+        reply_token = event.reply_token
+        if event.message.text == 'pineapple': index = 0
+        elif event.message.text == 'stone': index = 1
+        elif event.message.text == 'rock':index = 2
+        elif event.message.text == 'chum bucket':index = 3
+        elif event.message.text == 'sandy house':index = 4
+        elif event.message.text == 'jellyfish':index = 5
+        elif event.message.text == 'bank':index = 6
+        elif event.message.text == 'school':index = 7
+        elif event.message.text == 'KrustyKrab':index = 8
+        if(index != 8): send_ticket(reply_token, index)
+        else: send_address(reply_token)
+        self.go_back()
+
     ### Feature 8 : contact
     def on_enter_contact(self, event):
         reply_token = event.reply_token
@@ -253,7 +265,6 @@ class TocMachine(GraphMachine):
         send_text_message(reply_token, text,TocMachine.hamburgeremoji)
 
     def on_enter_email(self, event):
-        print("email")
         reply_token = event.reply_token
         print(event.message.text)
         text1 = event.message.text

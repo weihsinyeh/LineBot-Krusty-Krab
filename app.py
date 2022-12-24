@@ -22,16 +22,16 @@ machine = TocMachine(
         "order_food", "order_name", "order_num", "order_success",
         "weather",
         "address",
-        "vehicle",
         "way_of_eat",
+        "bus","ticket",
         "contact",
         "feedback","character","email",
     ],
     transitions=[
         ### Feature1 : about us
-        {   "trigger": "advance",   "source": "user",   "dest": "about",    "conditions": "is_going_to_about",  },
+        {   "trigger": "advance",   "source": ["way_of_eat","user"],   "dest": "about",    "conditions": "is_going_to_about",  },
         ### Feature2 : menu
-        {   "trigger": "advance",   "source": "user",   "dest": "menu",     "conditions": "is_going_to_menu",  },
+        {   "trigger": "advance",   "source": ["way_of_eat","user"],   "dest": "menu",     "conditions": "is_going_to_menu",  },
         ### Feature3 : order
         {   "trigger": "advance",   "source": "user",       "dest": "order_food",   "conditions": "is_going_to_order_food",},
         {   "trigger": "advance",   "source": "order_food", "dest": "order_name",   "conditions": "is_going_to_order_name",},
@@ -48,12 +48,14 @@ machine = TocMachine(
         {   "trigger": "advance",   "source": "user",   "dest": "weather",  "conditions": "is_going_to_weather",},
         ### Feature 6 : way to eat food
         {   "trigger": "advance",   "source": "user",   "dest": "way_of_eat","conditions": "is_going_to_way_of_eat",},
-        ### Feature 7 : vehicle
-        {   "trigger": "advance",   "source": "user",   "dest": "vehicle",  "conditions": "is_going_to_vehicle", },
+        ### Feature 7 : bus
+        {   "trigger": "advance",   "source": ["way_of_eat","user"],   "dest": "bus",  "conditions": "is_going_to_bus", },
+        {   "trigger": "advance",   "source": "bus",    "dest": "ticket",  "conditions": "is_going_to_ticket", },
+        {   "trigger": "advance",   "source": "ticket",   "dest": "user", },
         ### Feature 8 : contact
         {   "trigger": "advance",   "source": "user",   "dest": "contact",  "conditions": "is_going_to_contact", },
         ### Feature 9 : feedback
-        {   "trigger": "advance",   "source": "user",   "dest": "feedback",  "conditions": "is_going_to_feedback", },
+        {   "trigger": "advance",   "source": ["way_of_eat","user"],   "dest": "feedback",  "conditions": "is_going_to_feedback", },
         {   "trigger": "advance",   "source": "feedback",   "dest": "character",  "conditions": "is_going_to_character", },
         {   "trigger": "advance",   "source": "character",   "dest": "email",  "conditions": "is_going_to_email", },
         {   "trigger": "advance",   "source": "email",   "dest": "user", },
@@ -65,7 +67,7 @@ machine = TocMachine(
                                                 "email",
                                                 "address",
                                                 "weather",
-                                                "vehicle",
+                                                "ticket",
                                                 "contact",
                                                 "feedback",],"dest": "user",},
     ],
@@ -112,8 +114,6 @@ def callback():
         line_bot_api.reply_message(
             event.reply_token, TextSendMessage(text=event.message.text)
         )
-
-    return "OK"
 
 
 @app.route("/webhook", methods=["POST"])
