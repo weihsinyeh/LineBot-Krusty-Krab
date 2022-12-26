@@ -43,14 +43,17 @@ After input ==**"show fsm"**== you can see the **graph of finite state machine**
 ## Show Feature menu
 ### Operations
 1. After input ==**"feature"**== we can see the all feature of LineBot-Krusty-Krab 
+
 ![](https://i.imgur.com/Y4cyo05.png)
+
 ### Function
 Guide the customer how to use the line bot properly. 
 
 ---
 ## Feature 1 : About Us
 ### Operations
-1. After input ==**"about us"**== we can see the detail of Krusty-Krab 
+1. After input ==**"about us"**== we can see the detail of Krusty-Krab
+ 
 ![](https://i.imgur.com/0W73tDW.png)
 ### Function
 Show the Menu and Guide the customer to choice ==**"main food"**==, ==**"meal"**==, ==**"drink"**==
@@ -61,6 +64,7 @@ Show the Menu and Guide the customer to choice ==**"main food"**==, ==**"meal"**
 1. After input ==**"menu"**== then we can show the menu of Krabby Krab for customer to see 
 2. Then you can click ==**"main food"**== ,==**"meal"**== ,==**"drink"**== or just input it.
 3. After the operation mentioned above we will enter the order state
+
 ![](https://i.imgur.com/FUgoV3R.png)
 
 ---
@@ -69,22 +73,28 @@ Show the Menu and Guide the customer to choice ==**"main food"**==, ==**"meal"**
 1. After input ==**"main food"**== we will see the detail of the main food
 2. Then you just input the number of main food you want to order **(ex:"5" as follewed)**
 3. Then input the number of the food you want to order **(ex:"3" as follewed)**
+
 ![](https://i.imgur.com/ZLNn6SQ.png)
 
 4. After the operation aboved, we have three choice ==**"sure"**== ,==**"cancel"**==, ==**"order more"**==
     #### case1 : =="sure"==
     show the name of what you order and the total you need to pay 
+    
     ![](https://i.imgur.com/hnXNSZ3.png)
 
     #### case2 : =="cancel"==
     Just return to the initial state and you can input any request.
+    
     ![](https://i.imgur.com/JCN1dQz.png)
 
     #### case3 : =="order more"==
     1. show the menu again and you can click ==**"main food"**== ,==**"meal"**== ,==**"drink"**== or just input it.
     2. Back to the step 1.
+    
     ![](https://i.imgur.com/lwv9AHB.png)
+    
     ![](https://i.imgur.com/hhZmuhJ.png)
+    
     3. After you click ==**"sure"**== or input it, then we will show the name of what you order and the total you need to pay.
       
 :::info
@@ -102,6 +112,7 @@ Total : $90
 **Technique : web crawler**
 
 * Data source : 氣象資料開放平台 - https://opendata.cwb.gov.tw/dataset/observation/F-C0032-001
+
 * Location : Tainan's weather at that time (Krusty-Krab is located in Bikini Bottom where is the country of Tainan)
 ### Operations
 1.  After input ==**"weather"**== then we will show the detail of Bikini Bottom's weather
@@ -128,7 +139,9 @@ The weather in Bikini Bottom is fine today,you can go out to Krusty Krab to enjo
     >The weather in Bikini Bottom is fine today,you can go out to Krusty Krab to enjoy the scenery and delicious meals! 
     
     >The weather in Bikini Bottom is bad today,you can call delivery!!
+    
 ![](https://i.imgur.com/t6XAv73.png)
+
 4. Then we have two choice **"deliver"**, **"for here"**. 
 ### Function
 1. Give customer comment to make a choice.
@@ -142,16 +155,21 @@ The weather in Bikini Bottom is fine today,you can go out to Krusty Krab to enjo
 2. You can just click the text or input it.
     case 1-1 : ==**"deliver"**== (with make a order first).
     Then you can choose to kill time
+    
     ![](https://i.imgur.com/Ytu0lxK.png)
+    
     case 1-2 : ==**"deliver"**== (without make a order first).
     :::info
     :hamburger:You have to order food!
     Input "menu" to see what to eat
     :::
+    
     ![](https://i.imgur.com/RwG8ZaL.png)
 
     case 2: ==**"for here"**== -> ==**walk**==
+    
     ![](https://i.imgur.com/WcUhliS.png)
+    
     case 2-2: ==**"for here"**== -> ==**bus**==
     see Feature 8 : Take a Bus To Krusty-Krab
 ### Function
@@ -161,8 +179,11 @@ The weather in Bikini Bottom is fine today,you can go out to Krusty Krab to enjo
 ## Featuer 6 : Call to Krusty-Krab
 ### Operation
 1. After click ==**Call to Squidward!**== or just input ==**contact**==
+
 ![](https://i.imgur.com/bJ7gNgT.png)
+
 2. Then call to 09123456789
+
 ![](https://i.imgur.com/sTSi2Lv.png)
 
 ### Function
@@ -194,8 +215,11 @@ The weather in Bikini Bottom is fine today,you can go out to Krusty Krab to enjo
 :hamburger:Mr. crab works as a boss at the Krusty Krab, a job which he is good at and enjoys it.
 Input your feedback to Mr. crab!!!
 :::
+
 ![](https://i.imgur.com/txHbLnj.png)
+
 6. Then Krusty-Krab will receive your feedback. Thank you!
+
 ![](https://i.imgur.com/RTd7De4.png)
 
 ### Function
@@ -207,7 +231,9 @@ Improve the Krusty-Krab or Courage the hard-working employee.
 1. Input ==**"bus"**==
 2. Then we will show the customer every stop of the Bus
 3. Customer just click one of it or input the name of the stop(ex.==**"pineapple"**==)
+
 ![](https://i.imgur.com/tSOEbPM.png)
+
 4. Then customer can see the the ticked price from the source (**pineapple**) to destination (**Krusty-Krab**) and the time to pass (in minutes)
 :::info
 :hamburger: Stop : Pineapple House
@@ -215,8 +241,11 @@ SpongeBob lives here
 Ticket price: 7
 Time to pass : 5
 :::
+
 ![](https://i.imgur.com/4BcylHU.png)
+
 5. If the customer choose to click ==**"Krusty-Krab"**== or input ==**"Krusty-Krab"**==, the customer will see the actual **loacation of Krusty Krab restaurant** and the **map** of Bikini Bottom
+
 ![](https://i.imgur.com/SmQo2SW.png)
 
 ### Function
@@ -230,6 +259,7 @@ Time to pass : 5
 1. Input ==**"address"**==
 2. Then we will show the customer the actual **loacation of Krusty Krab restaurant** and the **map** of Bikini Bottom
 3. Customer can open the google map
+
 ![](https://i.imgur.com/tvMSa22.png)
 
 ---
