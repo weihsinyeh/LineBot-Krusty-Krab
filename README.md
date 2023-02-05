@@ -18,6 +18,7 @@ Button carousel templates are designed and implemented in every feature. Instead
 
 There are four main componenets in this project
 
+* Ngrok : that allows intranet servers to communicate with line by setting webhook url so that chat bot can post messages to my server.
 * LINE Bot: Built by the official LINE Messaging API
 * Web Scraping: Use function "get" of Requests Library to scrape json url of 氣象資料開放平台.
     Then use way of dictionary to retrieve weather information
