@@ -300,7 +300,10 @@ def send_contact(reply_token):
             actions=[URITemplateAction(label="Call", uri="tel:0123456789")],  # 開啟打電話功能
         ),
     )
-    line_bot_api.reply_message(reply_token, message)
+    image_url="https://i.imgur.com/1yErAaK.png"
+    image_message = ImageSendMessage(original_content_url=image_url, preview_image_url=image_url,)
+    line_bot_api.push_message(reply_token,image_message)
+    #line_bot_api.reply_message(reply_token, message)
     return "OK"
 
 ### Feature 9 : Feedback

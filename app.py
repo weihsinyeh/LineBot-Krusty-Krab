@@ -3,9 +3,9 @@ import sys
 
 from flask import Flask, jsonify, request, abort, send_file
 from dotenv import load_dotenv
-from linebot import LineBotApi, WebhookParser
+from linebot import LineBotApi, WebhookParser, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage
 
 from fsm import TocMachine
 from utils import send_text_message
@@ -97,7 +97,7 @@ if channel_access_token is None:
 
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
-
+handler = WebhookHandler('YOUR_CHANNEL_SECRET')
 
 @app.route("/callback", methods=["POST"])
 def callback():
@@ -158,6 +158,14 @@ def show_fsm():
     machine.get_graph().draw("fsm.png", prog="dot", format="png")
     return send_file("fsm.png", mimetype="img/png")
 
+@handler.add(MessageEvent, message=ImageSendMessage)
+def handle_image_message(event):
+    # 檢查是否有位置資訊
+    if event.message.content_provider.type == "line":
+        # 取得點擊位置的座標
+        x = event.message.content_provider.original_content_url.x
+        y = event.message.content_provider.original_content_url.y
+        print("使用者點擊座標：({},{})".format(x, y))
 
 if __name__ == "__main__":
     port = os.environ.get("PORT", 8000)

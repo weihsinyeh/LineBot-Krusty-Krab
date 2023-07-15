@@ -265,6 +265,7 @@ class TocMachine(GraphMachine):
     ### Feature 9 : feedback
     def on_enter_feedback(self, event):
         reply_token = event.reply_token
+        # reply_token = event.source.user_id
         send_feedback(reply_token)
 
     def on_enter_character(self, event):
